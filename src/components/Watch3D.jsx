@@ -31,7 +31,8 @@ function extrude(shape, depth, bevel = 0.06) {
   return g
 }
 
-// A 3D smart-ski wristband/watch rendered with Three.js.
+// A 3D rugged sports smart-band (orange strap / black case), à la the team's
+// reference wristband. Screen sits dark/off in this "ready" state.
 export default function Watch3D({ height = 260 }) {
   const mountRef = useRef(null)
 
@@ -52,108 +53,103 @@ export default function Watch3D({ height = 260 }) {
     renderer.outputColorSpace = THREE.SRGBColorSpace
     mount.appendChild(renderer.domElement)
 
-    // ---- Lighting (cool alpine key + warm fill) ----
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55))
-    const key = new THREE.DirectionalLight(0xffffff, 1.5)
+    // ---- Lighting (neutral product-shot with warm rim) ----
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65))
+    const key = new THREE.DirectionalLight(0xffffff, 1.6)
     key.position.set(4, 6, 8)
     scene.add(key)
-    const rim = new THREE.DirectionalLight(0x3b9ce0, 1.4)
-    rim.position.set(-6, -2, 4)
+    const fill = new THREE.DirectionalLight(0xffffff, 0.6)
+    fill.position.set(-6, -2, 5)
+    scene.add(fill)
+    const rim = new THREE.DirectionalLight(0xffdcb0, 1.0)
+    rim.position.set(-3, 4, -6)
     scene.add(rim)
-    const glow = new THREE.PointLight(0x3b9ce0, 3, 20)
-    glow.position.set(0, 0, 3)
-    scene.add(glow)
+    const spec = new THREE.PointLight(0xffffff, 1.2, 24)
+    spec.position.set(1.5, 2.5, 4)
+    scene.add(spec)
 
     const watch = new THREE.Group()
     scene.add(watch)
 
     // ---- Materials ----
-    const navy = new THREE.MeshStandardMaterial({ color: 0x0e2a47, metalness: 0.55, roughness: 0.35 })
-    const bezel = new THREE.MeshStandardMaterial({ color: 0x12325a, metalness: 0.8, roughness: 0.25 })
-    const screen = new THREE.MeshStandardMaterial({ color: 0x081a30, metalness: 0.3, roughness: 0.15 })
-    const glacier = new THREE.MeshStandardMaterial({
-      color: 0x3b9ce0,
-      emissive: 0x3b9ce0,
-      emissiveIntensity: 0.9,
-      metalness: 0.4,
-      roughness: 0.3,
-    })
-    const ice = new THREE.MeshStandardMaterial({ color: 0xbfe0f5, emissive: 0x9fd4f2, emissiveIntensity: 0.5 })
+    const caseBlack = new THREE.MeshStandardMaterial({ color: 0x1c1c1f, metalness: 0.5, roughness: 0.42 })
+    const rubber = new THREE.MeshStandardMaterial({ color: 0x141416, metalness: 0.2, roughness: 0.7 })
+    const screenMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0c, metalness: 0.25, roughness: 0.07 })
+    const orange = new THREE.MeshStandardMaterial({ color: 0xf26a21, metalness: 0.2, roughness: 0.5 })
+    const orangeSoft = new THREE.MeshStandardMaterial({ color: 0xef6a22, metalness: 0.1, roughness: 0.62 })
+    const grey = new THREE.MeshStandardMaterial({ color: 0xc3c6c9, metalness: 0.35, roughness: 0.45 })
 
-    // ---- Body ----
-    const body = new THREE.Mesh(extrude(roundedRect(3.1, 3.6, 0.9), 0.55), navy)
+    // ---- Rugged case (black bumper) ----
+    const bumper = new THREE.Mesh(extrude(roundedRect(3.35, 3.9, 0.55), 0.7), caseBlack)
+    bumper.position.z = -0.05
+    watch.add(bumper)
+
+    // Corner guards — small protruding rugged tabs
+    const guardGeo = extrude(roundedRect(0.72, 0.72, 0.22), 0.95, 0.08)
+    ;[[-1.42, -1.72], [1.42, -1.72], [-1.42, 1.72], [1.42, 1.72]].forEach(([x, y]) => {
+      const g = new THREE.Mesh(guardGeo, caseBlack)
+      g.position.set(x, y, 0)
+      watch.add(g)
+    })
+
+    // Inner body + glossy dark screen
+    const body = new THREE.Mesh(extrude(roundedRect(2.75, 3.35, 0.7), 0.55), rubber)
+    body.position.z = 0.18
     watch.add(body)
 
-    // Bezel ring (metallic frame)
-    const bezelMesh = new THREE.Mesh(extrude(roundedRect(2.7, 3.15, 0.8), 0.2), bezel)
-    bezelMesh.position.z = 0.36
-    watch.add(bezelMesh)
-
-    // Screen face
-    const face = new THREE.Mesh(extrude(roundedRect(2.35, 2.8, 0.7), 0.06), screen)
-    face.position.z = 0.5
+    const face = new THREE.Mesh(extrude(roundedRect(2.42, 3.0, 0.6), 0.08), screenMat)
+    face.position.z = 0.44
     watch.add(face)
 
-    // ---- Clock: glowing ring + ticks + hands ("o'clock" dial) ----
-    const dial = new THREE.Group()
-    dial.position.z = 0.6
-    watch.add(dial)
+    // Faint screen reflection strip so the glass reads as glossy
+    const glare = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.5, 2.6),
+      new THREE.MeshBasicMaterial({ color: 0x2a3340, transparent: true, opacity: 0.25 })
+    )
+    glare.position.set(-0.55, 0.15, 0.49)
+    glare.rotation.z = 0.18
+    watch.add(glare)
 
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.98, 0.055, 20, 64), glacier)
-    dial.add(ring)
-
-    // hour ticks
-    for (let i = 0; i < 12; i++) {
-      const major = i % 3 === 0
-      const tick = new THREE.Mesh(
-        new THREE.BoxGeometry(major ? 0.09 : 0.05, major ? 0.22 : 0.13, 0.04),
-        major ? glacier : ice,
-      )
-      const a = (i / 12) * Math.PI * 2
-      const r = 0.78
-      tick.position.set(Math.sin(a) * r, Math.cos(a) * r, 0.02)
-      tick.rotation.z = -a
-      dial.add(tick)
-    }
-
-    // hands
-    const hourHand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.05), ice)
-    hourHand.geometry.translate(0, 0.25, 0)
-    hourHand.rotation.z = -Math.PI / 3
-    dial.add(hourHand)
-
-    const minHand = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.72, 0.05), glacier)
-    minHand.geometry.translate(0, 0.36, 0)
-    minHand.rotation.z = Math.PI / 5
-    dial.add(minHand)
-
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 20), glacier)
-    cap.rotation.x = Math.PI / 2
-    cap.position.z = 0.05
-    dial.add(cap)
-
-    // Side crown button
-    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.3, 20), bezel)
+    // ---- Orange side crown + button ----
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.34, 24), orange)
     crown.rotation.z = Math.PI / 2
-    crown.position.set(1.62, 0.3, 0.2)
+    crown.position.set(1.78, 0.42, 0.12)
     watch.add(crown)
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.42, 20), orange)
+    btn.rotation.z = Math.PI / 2
+    btn.position.set(1.76, -0.55, 0.12)
+    watch.add(btn)
 
-    // ---- Straps ----
-    const strapMat = new THREE.MeshStandardMaterial({ color: 0x0b2036, metalness: 0.3, roughness: 0.6 })
-    const strapTop = new THREE.Mesh(extrude(roundedRect(2.2, 2.0, 0.5), 0.35), strapMat)
-    strapTop.position.set(0, 2.55, -0.15)
-    strapTop.rotation.x = 0.5
-    watch.add(strapTop)
-    const strapBot = new THREE.Mesh(extrude(roundedRect(2.2, 2.0, 0.5), 0.35), strapMat)
-    strapBot.position.set(0, -2.55, -0.15)
-    strapBot.rotation.x = -0.5
-    watch.add(strapBot)
+    // ---- Orange straps with grey reflective centre stripe ----
+    const makeStrap = (y, rot, withHoles) => {
+      const g = new THREE.Group()
+      const strap = new THREE.Mesh(extrude(roundedRect(2.25, 2.3, 0.55), 0.34), orangeSoft)
+      g.add(strap)
+      // grey reflective stripe down the middle
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.48, 2.3, 0.05), grey)
+      stripe.position.z = 0.22
+      g.add(stripe)
+      // strap holes on the far segment (like the reference lower band)
+      if (withHoles) {
+        for (let i = 0; i < 4; i++) {
+          const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.2, 16), caseBlack)
+          hole.rotation.x = Math.PI / 2
+          hole.position.set(0, -0.5 - i * 0.35, 0.18)
+          g.add(hole)
+        }
+      }
+      g.position.set(0, y, -0.15)
+      g.rotation.x = rot
+      return g
+    }
+    watch.add(makeStrap(2.85, 0.55, false))
+    watch.add(makeStrap(-2.85, -0.55, true))
 
-    watch.scale.setScalar(1.05)
+    watch.scale.setScalar(1.02)
 
     // ---- Interaction: gentle drag to rotate ----
-    let targetY = -0.35
-    let targetX = 0.1
+    let targetY = -0.3
+    let targetX = 0.08
     let curY = targetY
     let curX = targetX
     let dragging = false
@@ -188,13 +184,12 @@ export default function Watch3D({ height = 260 }) {
     const clock = new THREE.Clock()
     const render = () => {
       const t = clock.getElapsedTime()
-      if (!dragging && !reduce) targetY = -0.35 + Math.sin(t * 0.5) * 0.35
+      if (!dragging && !reduce) targetY = -0.3 + Math.sin(t * 0.5) * 0.35
       curY += (targetY - curY) * 0.08
       curX += (targetX - curX) * 0.08
       watch.rotation.y = curY
       watch.rotation.x = curX
       watch.position.y = reduce ? 0 : Math.sin(t * 1.1) * 0.12
-      ring.material.emissiveIntensity = 0.7 + Math.sin(t * 2) * 0.3
       renderer.render(scene, camera)
       raf = requestAnimationFrame(render)
     }
@@ -225,5 +220,5 @@ export default function Watch3D({ height = 260 }) {
     }
   }, [height])
 
-  return <div ref={mountRef} style={{ width: '100%', height }} aria-label="3D smart ski wristband" />
+  return <div ref={mountRef} style={{ width: '100%', height }} aria-label="3D rugged smart ski wristband" />
 }

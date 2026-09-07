@@ -26,7 +26,7 @@ export default function RefundReceipt() {
       <StatusHeader title="Return Receipt" eyebrow="Step 4 of 4 · Completed" right={<Chip tone="safe">Done</Chip>} />
       <StepBar step={4} />
 
-      <div className="px-5 pt-6 pb-8">
+      <div className="px-5 pt-8 pb-24">
         <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 240, damping: 16 }} className="flex justify-center">
           <div className="w-16 h-16 rounded-full grid place-items-center text-white" style={{ background: 'linear-gradient(180deg,#3B9CE0,#2B88CB)' }}>
             <CheckCircle2 size={34} />

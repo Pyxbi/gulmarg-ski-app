@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Outside the phone column, on desktop, show a cold ambient backdrop */
+  background: linear-gradient(160deg, #dbeafe 0%, #eff6ff 40%, #f8fafc 100%);
+  color: #0e2a47;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular figures for live telemetry (temp, speed, altitude...) */
+.nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@layer components {
+  /* Level 1 frosted glass panel */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px -4px rgba(14, 42, 71, 0.06);
+  }
+  /* Level 2 floating module */
+  .glass-2 {
+    background: rgba(234, 244, 251, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(191, 224, 245, 0.6);
+    box-shadow: 0 12px 36px -6px rgba(14, 42, 71, 0.1),
+      0 4px 12px -2px rgba(59, 156, 224, 0.08);
+  }
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 w-full rounded-full text-white font-semibold text-[15px];
+    height: 54px;
+    background: linear-gradient(180deg, #3b9ce0 0%, #2b88cb 100%);
+    box-shadow: 0 4px 14px rgba(59, 156, 224, 0.35);
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+    filter: brightness(0.94);
+  }
+  .btn-secondary {
+    @apply flex items-center justify-center gap-2 w-full rounded-full font-semibold text-[15px] text-navy;
+    height: 50px;
+    background: rgba(234, 244, 251, 0.7);
+    border: 1px solid #bfe0f5;
+  }
+}
+
+/* Hide scrollbars inside the phone frame but keep scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Live GPS marker pulse (used by Leaflet divIcons) */
+.gps-dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(14, 42, 71, 0.35);
+}
+.gps-dot.safe { background: #10b981; }
+.gps-dot.danger { background: #e11d48; }
+.gps-ring {
+  position: absolute;
+  inset: -12px;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.gps-ring.safe { background: radial-gradient(circle, #10b98155, transparent 70%); animation: gpsPulse 2.4s ease-out infinite; }
+.gps-ring.danger { background: radial-gradient(circle, #e11d4877, transparent 70%); animation: gpsPulse 1.4s ease-out infinite; }
+@keyframes gpsPulse {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  70% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+/* Trim Leaflet's default chrome to fit the frosted UI */
+.leaflet-container { background: #dfe7ee; font-family: inherit; }
+.leaflet-control-attribution {
+  font-size: 9px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+.leaflet-control-zoom a {
+  border-radius: 10px !important;
+  color: #0e2a47 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

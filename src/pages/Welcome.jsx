@@ -12,7 +12,7 @@ export default function Welcome() {
   const navigate = useNavigate()
   return (
     <PageTransition>
-      <div className="px-5 pt-5 pb-8">
+      <div className="px-5 pt-5 pb-24">
         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="flex justify-center">
           <div className="w-12 h-12 rounded-full grid place-items-center text-white" style={{ background: 'linear-gradient(180deg,#3B9CE0,#2B88CB)' }}>
             <BadgeCheck size={26} />

@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "test:ui": "node scripts/verify-ui-contract.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.5.4",

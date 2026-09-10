@@ -15,7 +15,7 @@ export default function Return() {
       <StatusHeader eyebrow="Gulmarg Express" title="Return Band & Refund" />
       <StepBar step={1} />
 
-      <div className="px-5 pt-4 pb-8">
+      <div className="px-5 pt-4 pb-24">
         <div className="flex items-center gap-2">
           <span className="w-6 h-6 rounded-full bg-glacier text-white grid place-items-center text-[12px] font-bold">1</span>
           <span className="text-[13px] font-semibold text-navy">Step 1 of 4 · Scan Kiosk QR Screen</span>

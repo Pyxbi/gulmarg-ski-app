@@ -24,7 +24,7 @@ export default function RefundMethod() {
       <StatusHeader back title="Refund Method" eyebrow="Step 3 of 4" />
       <StepBar step={3} />
 
-      <div className="px-5 pt-4 pb-8">
+      <div className="px-5 pt-4 pb-24">
         <div className="rounded-card bg-frost/70 border border-ice/60 p-3.5 flex items-center justify-between">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wide text-slope">Refundable deposit</div>

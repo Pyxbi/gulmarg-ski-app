@@ -7,9 +7,21 @@ import 'leaflet/dist/leaflet.css'
 // Real Gulmarg ski area via Leaflet + Esri satellite tiles (no API key needed).
 // You = green marker (no name). A red hazard marker appears only after ~10s.
 
-const GULMARG = [34.0387, 74.3822] // Kongdoori / Gondola area
-const YOU = [34.0405, 74.3846]
-const HAZARD = [34.031, 74.366] // ~a few hundred metres away, on the slope
+// A slightly westward view keeps the snow field and the Gulmarg label visible together.
+const GULMARG = [34.0387, 74.3750]
+const YOU = [34.0335, 74.3670]
+const TOP_LEFT_GREEN_MARKER = [34.0367, 74.3610]
+const WHITE_SLOPE_GREEN_MARKERS = [
+  [34.0350, 74.3635],
+  [34.0320, 74.3700],
+  [34.0295, 74.3650],
+  TOP_LEFT_GREEN_MARKER,
+  [34.0305, 74.3680],
+]
+const WHITE_SLOPE_RED_HAZARDS = [
+  [34.0330, 74.3615],
+  [34.0290, 74.3720],
+]
 
 // A CSS-animated coloured dot rendered as a Leaflet divIcon.
 const gpsIcon = (tone) =>
@@ -50,12 +62,20 @@ export default function GulmargMap() {
       { maxZoom: 18, opacity: 0.9 }
     ).addTo(map)
 
-    // You — green, no label
+    // You + nearby skiers — green, no labels
     L.marker(YOU, { icon: gpsIcon('safe'), interactive: false }).addTo(map)
+    WHITE_SLOPE_GREEN_MARKERS.forEach((position) => {
+      L.marker(position, { icon: gpsIcon('safe'), interactive: false }).addTo(map)
+    })
 
-    // Hazard — red, only after 10s
+    // Hazards — red, only after 10s
     const t = setTimeout(() => {
-      hazardMarker.current = L.marker(HAZARD, { icon: gpsIcon('danger') }).addTo(map)
+      hazardMarker.current = []
+      WHITE_SLOPE_RED_HAZARDS.forEach((position) => {
+        hazardMarker.current.push(
+          L.marker(position, { icon: gpsIcon('danger') }).addTo(map)
+        )
+      })
       setAlert(true)
     }, 10000)
 
@@ -72,7 +92,7 @@ export default function GulmargMap() {
   }, [])
 
   const focusHazard = () => {
-    if (mapRef.current) mapRef.current.flyTo(HAZARD, 15, { duration: 0.8 })
+    if (mapRef.current) mapRef.current.flyTo(WHITE_SLOPE_RED_HAZARDS[0], 15, { duration: 0.8 })
   }
   const zoom = (dir) => {
     if (mapRef.current) dir > 0 ? mapRef.current.zoomIn() : mapRef.current.zoomOut()
